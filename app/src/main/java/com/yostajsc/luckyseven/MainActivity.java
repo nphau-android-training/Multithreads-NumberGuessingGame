@@ -1,5 +1,8 @@
 package com.yostajsc.luckyseven;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
@@ -93,7 +96,6 @@ public class MainActivity extends AppCompatActivity {
         new android.os.Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-
                 if (timer3 != null)
                     timer3.cancel();
             }
@@ -110,7 +112,29 @@ public class MainActivity extends AppCompatActivity {
         if (n1 == n2 && n2 == n3 && n1 == 7) {
             Toast.makeText(this, "BINGO", Toast.LENGTH_LONG).show();
         } else {
-            Toast.makeText(this, "Chúc bạn mai mắn lần sau!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Chúc bạn may mắn lần sau!", Toast.LENGTH_LONG).show();
+
+
+            // Tạo hộp thoại UI thông báo xác nhận hành động
+
+            new AlertDialog.Builder(MainActivity.this)
+                    .setTitle("Bạn muốn lưu kết quả này không?")
+                    .setMessage("Lưu kết quả cao nhất để xếp hạng, bạn có muốn tiếp tục không?")
+                    .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    })
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            Toast.makeText(MainActivity.this, "Lưu thành công", Toast.LENGTH_LONG).show();
+                        }
+                    })
+                    .create()
+                    .show();
+
         }
     }
 

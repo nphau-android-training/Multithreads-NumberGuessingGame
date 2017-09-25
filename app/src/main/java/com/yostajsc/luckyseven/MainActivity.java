@@ -120,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
             new AlertDialog.Builder(MainActivity.this)
                     .setTitle("Bạn muốn lưu kết quả này không?")
                     .setMessage("Lưu kết quả cao nhất để xếp hạng, bạn có muốn tiếp tục không?")
+                    .setCancelable(false)
                     .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {

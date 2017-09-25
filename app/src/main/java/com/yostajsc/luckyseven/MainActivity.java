@@ -1,5 +1,6 @@
 package com.yostajsc.luckyseven;
 
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,10 +12,11 @@ import android.widget.Toast;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Handler;
 
 public class MainActivity extends AppCompatActivity {
 
-    TextView text1, text2, text3;
+    TextView text1, text2, text3, textTitle;
     Button bnPlay;
 
     boolean isPlay = false;
@@ -31,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
         text1 = (TextView) findViewById(R.id.text_1);
         text2 = (TextView) findViewById(R.id.text_2);
         text3 = (TextView) findViewById(R.id.text_3);
+        textTitle = (TextView) findViewById(R.id.text_title);
+
         bnPlay = (Button) findViewById(R.id.btn_play);
 
         bnPlay.setOnClickListener(new View.OnClickListener() {
@@ -43,6 +47,33 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        autoChangeColor();
+    }
+
+    int colorIndex = 0;
+
+    void autoChangeColor() {
+
+        final int colorArr[] = new int[3];
+        colorArr[0] = Color.RED;
+        colorArr[1] = Color.GREEN;
+        colorArr[2] = Color.BLUE;
+
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (colorIndex == 2) {
+                    colorIndex = 0;
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        textTitle.setTextColor(colorArr[colorIndex]);
+                    }
+                });
+                colorIndex ++;
+            }
+        }, 1000, 1000);
     }
 
     void pause() {
@@ -50,10 +81,24 @@ public class MainActivity extends AppCompatActivity {
         bnPlay.setText("Chạy");
         if (timer1 != null)
             timer1.cancel();
-        if (timer2 != null)
-            timer2.cancel();
-        if (timer3 != null)
-            timer3.cancel();
+
+        new android.os.Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (timer2 != null)
+                    timer2.cancel();
+            }
+        }, 1000);
+
+        new android.os.Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                if (timer3 != null)
+                    timer3.cancel();
+            }
+        }, 2000);
+
 
         String num1 = text1.getText().toString();
         String num2 = text2.getText().toString();

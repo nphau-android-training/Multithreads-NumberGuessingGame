@@ -1,12 +1,12 @@
 package com.yostajsc.luckyseven;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
-import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -15,12 +15,11 @@ import android.widget.Toast;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.Handler;
 
 public class MainActivity extends AppCompatActivity {
 
     TextView text1, text2, text3, textTitle;
-    Button bnPlay;
+    Button btnPlay;
 
     boolean isPlay = false;
 
@@ -31,23 +30,20 @@ public class MainActivity extends AppCompatActivity {
         initViews();
     }
 
-    void initViews() {
+    private void initViews() {
 
         text1 = (TextView) findViewById(R.id.text_1);
         text2 = (TextView) findViewById(R.id.text_2);
         text3 = (TextView) findViewById(R.id.text_3);
         textTitle = (TextView) findViewById(R.id.text_title);
 
-        bnPlay = (Button) findViewById(R.id.btn_play);
+        btnPlay = (Button) findViewById(R.id.btn_play);
 
-        bnPlay.setOnClickListener(new View.OnClickListener() {
+        btnPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (isPlay) {
-                    pause();
-                } else {
-                    play();
-                }
+                if (isPlay) pause();
+                else play();
             }
         });
         autoChangeColor();
@@ -55,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
     int colorIndex = 0;
 
-    void autoChangeColor() {
+    private void autoChangeColor() {
 
         final int colorArr[] = new int[3];
         colorArr[0] = Color.RED;
@@ -68,36 +64,51 @@ public class MainActivity extends AppCompatActivity {
                 if (colorIndex == 2) {
                     colorIndex = 0;
                 }
+                colorIndex++;
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         textTitle.setTextColor(colorArr[colorIndex]);
                     }
                 });
-                colorIndex ++;
             }
         }, 1000, 1000);
     }
 
-    void pause() {
+    private Handler handler02;
+    private Handler handler03;
+
+    private void pause() {
+
+        lock(true);
+
         isPlay = false;
-        bnPlay.setText("Chạy");
+        btnPlay.setText("Chạy");
+
         if (timer1 != null)
             timer1.cancel();
 
-        new android.os.Handler().postDelayed(new Runnable() {
+        if (handler02 == null)
+            handler02 = new android.os.Handler();
+        handler02.postDelayed(new Runnable() {
             @Override
             public void run() {
                 if (timer2 != null)
                     timer2.cancel();
+                handler02 = null;
             }
         }, 1000);
 
-        new android.os.Handler().postDelayed(new Runnable() {
+        if (handler03 == null)
+            handler03 = new android.os.Handler();
+        handler03.postDelayed(new Runnable() {
             @Override
             public void run() {
                 if (timer3 != null)
                     timer3.cancel();
+                handler03 = null;
+                confirmStore();
+                lock(false);
             }
         }, 2000);
 
@@ -109,49 +120,53 @@ public class MainActivity extends AppCompatActivity {
         int n1 = Integer.parseInt(num1);
         int n2 = Integer.parseInt(num2);
         int n3 = Integer.parseInt(num3);
-        if (n1 == n2 && n2 == n3 && n1 == 7) {
+        if (n1 == n2 && n2 == n3 && n1 == 7)
             Toast.makeText(this, "BINGO", Toast.LENGTH_LONG).show();
-        } else {
+        else
             Toast.makeText(this, "Chúc bạn may mắn lần sau!", Toast.LENGTH_LONG).show();
-
-
-            // Tạo hộp thoại UI thông báo xác nhận hành động
-
-            new AlertDialog.Builder(MainActivity.this)
-                    .setTitle("Bạn muốn lưu kết quả này không?")
-                    .setMessage("Lưu kết quả cao nhất để xếp hạng, bạn có muốn tiếp tục không?")
-                    .setCancelable(false)
-                    .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            dialogInterface.dismiss();
-                        }
-                    })
-                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            Toast.makeText(MainActivity.this, "Lưu thành công", Toast.LENGTH_LONG).show();
-                        }
-                    })
-                    .create()
-                    .show();
-
-        }
     }
 
-    void play() {
+    private void lock(boolean isLock) {
+        btnPlay.setClickable(!isLock);
+        btnPlay.setEnabled(!isLock);
+    }
+
+    // Tạo hộp thoại UI thông báo xác nhận hành động
+    private void confirmStore() {
+        new AlertDialog.Builder(MainActivity.this)
+                .setTitle("Bạn muốn lưu kết quả này không?")
+                .setMessage("Lưu kết quả cao nhất để xếp hạng, bạn có muốn tiếp tục không?")
+                .setCancelable(false)
+                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                })
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Toast.makeText(MainActivity.this, "Lưu thành công", Toast.LENGTH_LONG).show();
+                    }
+                })
+                .create()
+                .show();
+    }
+
+    private void play() {
         isPlay = true;
-        bnPlay.setText("Dừng");
+        btnPlay.setText("Dừng");
         makeData1();
         makeData2();
         makeData3();
     }
 
-    Timer timer1 = null;
+    private Timer timer1 = null;
 
-    void makeData1() {
+    private void makeData1() {
 
         final Random random = new Random();
+
         timer1 = new Timer();
         timer1.schedule(new TimerTask() {
             @Override
@@ -166,12 +181,12 @@ public class MainActivity extends AppCompatActivity {
         }, 10, 10);
     }
 
-    Timer timer2 = null;
+    private Timer timer2 = null;
 
-    void makeData2() {
+    private void makeData2() {
         final Random random = new Random();
-        timer2 = new Timer();
 
+        timer2 = new Timer();
         timer2.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -186,12 +201,13 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    Timer timer3 = null;
+    private Timer timer3 = null;
 
-    void makeData3() {
+    private void makeData3() {
+
         final Random random = new Random();
-        timer3 = new Timer();
 
+        timer3 = new Timer();
         timer3.schedule(new TimerTask() {
             @Override
             public void run() {
